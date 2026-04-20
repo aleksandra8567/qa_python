@@ -1,4 +1,5 @@
 from main import BooksCollector
+import pytest
 
 # класс TestBooksCollector объединяет набор тестов, которыми мы покрываем наше приложение BooksCollector
 # обязательно указывать префикс Test
@@ -6,10 +7,10 @@ class TestBooksCollector:
 
     # пример теста:
     # обязательно указывать префикс test_
-    # дальше идет название метода, который тестируем add_new_book_
-    # затем, что тестируем add_two_books - добавление двух книг
+    # дальше идёт название метода, который тестируем add_new_book_
+    # затем, что тестируем add_two_books — добавление двух книг
     def test_add_new_book_add_two_books(self):
-        # создаем экземпляр (объект) класса BooksCollector
+        # создаём экземпляр (объект) класса BooksCollector
         collector = BooksCollector()
 
         # добавляем две книги
@@ -20,14 +21,32 @@ class TestBooksCollector:
         # словарь books_rating, который нам возвращает метод get_books_rating, имеет длину 2
         assert len(collector.get_books_genre()) == 2
 
-    # напиши свои тесты ниже
-    # чтобы тесты были независимыми в каждом из них создавай отдельный экземпляр класса BooksCollector()
-    def test_add_new_book_invalid_length(self):
+    @pytest.mark.parametrize("book_name, is_valid", [
+        ('', False),
+        ('a' * 40, True),
+        ('a' * 41, False),
+        ('x', True),
+    ])
+    def test_add_new_book_length_validation(self, book_name, is_valid):
         collector = BooksCollector()
-        collector.add_new_book('')
-        long_name = 'a' * 41
-        collector.add_new_book(long_name)
-        assert len(collector.get_books_genre()) == 0
+        collector.add_new_book(book_name)
+        books = collector.get_books_genre()
+
+        if is_valid:
+            assert book_name in books
+        else:
+            assert book_name not in books
+
+    def test_get_books_genre(self):
+        collector = BooksCollector()
+        expected_books = {'Дюна': 'Фантастика', 'Оно': 'Ужасы'}
+
+        for book, genre in expected_books.items():
+            collector.add_new_book(book)
+            collector.set_book_genre(book, genre)
+
+        actual_books = collector.get_books_genre()
+        assert actual_books == expected_books
 
     def test_set_book_genre_valid_genre(self):
         collector = BooksCollector()
