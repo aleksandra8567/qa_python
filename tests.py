@@ -1,50 +1,42 @@
 from main import BooksCollector
 import pytest
 
-# класс TestBooksCollector объединяет набор тестов, которыми мы покрываем наше приложение BooksCollector
-# обязательно указывать префикс Test
 class TestBooksCollector:
 
-    # пример теста:
-    # обязательно указывать префикс test_
-    # дальше идёт название метода, который тестируем add_new_book_
-    # затем, что тестируем add_two_books — добавление двух книг
     def test_add_new_book_add_two_books(self):
-        # создаём экземпляр (объект) класса BooksCollector
         collector = BooksCollector()
-
-        # добавляем две книги
         collector.add_new_book('Гордость и предубеждение и зомби')
         collector.add_new_book('Что делать, если ваш кот хочет вас убить')
-
-        # проверяем, что добавилось именно две
-        # словарь books_rating, который нам возвращает метод get_books_rating, имеет длину 2
         assert len(collector.get_books_genre()) == 2
 
-    @pytest.mark.parametrize("book_name, is_valid", [
-        ('', False),
-        ('a' * 40, True),
-        ('a' * 41, False),
-        ('x', True),
+    @pytest.mark.parametrize("book_name", [
+        ('a' * 40),
+        ('x'),
+        ('Книга с нормальным названием'),
     ])
-    def test_add_new_book_length_validation(self, book_name, is_valid):
+    def test_add_new_book_valid_length(self, book_name):
         collector = BooksCollector()
         collector.add_new_book(book_name)
         books = collector.get_books_genre()
+        assert book_name in books
 
-        if is_valid:
-            assert book_name in books
-        else:
-            assert book_name not in books
+    @pytest.mark.parametrize("book_name", [
+        (''),
+        ('a' * 41),
+        ('Очень длинное название книги, которое превышает допустимую длину в сорок символов'),
+    ])
+    def test_add_new_book_invalid_length(self, book_name):
+        collector = BooksCollector()
+        collector.add_new_book(book_name)
+        books = collector.get_books_genre()
+        assert book_name not in books
 
     def test_get_books_genre(self):
         collector = BooksCollector()
         expected_books = {'Дюна': 'Фантастика', 'Оно': 'Ужасы'}
-
         for book, genre in expected_books.items():
             collector.add_new_book(book)
             collector.set_book_genre(book, genre)
-
         actual_books = collector.get_books_genre()
         assert actual_books == expected_books
 
